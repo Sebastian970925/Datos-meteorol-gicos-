@@ -39,6 +39,38 @@
             }
         }
 
+
+async function obtenerClimaYGuardar() {
+    try {
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        // Imprimir en consola la respuesta completa
+        console.log("Respuesta completa de la API:", data);
+
+        const clima = data.current;
+        const ahora = new Date().getTime();  // Tiempo actual
+
+        // Guardar los datos en localStorage
+        localStorage.setItem('clima', JSON.stringify({
+            temperatura: clima.temperature,
+            humedad: clima.humidity,
+            windSpeed: clima.wind_speed,
+            descripcion: clima.summary,
+            ultimaActualizacion: ahora
+        }));
+
+        actualizarInterfaz(clima); // Actualizar la interfaz con los nuevos datos
+        
+    } catch (error) {
+        console.error('Error al obtener los datos del clima:', error);
+    }
+}
+
+
+
+
+        
         // Función para obtener el clima desde la API y guardar los datos
         async function obtenerClimaYGuardar() {
             try {
