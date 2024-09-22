@@ -4,33 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clima Actual - Meteosource</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            font-size: 24px;
+            color: #1a73e8;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .value {
+            font-weight: bold;
+            color: #333;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #777;
+        }
+    </style>
 </head>
 <body>
-    <h1>Datos Meteorológicos Actuales</h1>
-    <p><strong>Temperatura:</strong> <span id="temp">Cargando...</span></p>
-    <p><strong>Humedad:</strong> <span id="humidity">Cargando...</span></p>
-    <p><strong>Velocidad del Viento:</strong> <span id="windSpeed">Cargando...</span></p>
-    <p><strong>Descripción del Clima:</strong> <span id="description">Cargando...</span></p>
+    <div class="container">
+        <h1>Datos Meteorológicos Actuales</h1>
+        <p><strong>Temperatura:</strong> <span id="temp" class="value">Cargando...</span></p>
+        <p><strong>Descripción del Clima:</strong> <span id="description" class="value">Cargando...</span></p>
+        <p><strong>Porcentaje de Nubosidad:</strong> <span id="cloudCover" class="value">Cargando...</span></p>
+        
+        <div class="footer">Datos proporcionados por Meteosource API</div>
+    </div>
 
     <script>
-        const apiKey = 'edyfobtg0k2u68czfakm5hq1yes4mj5dlcntz4e7';  // Reemplaza con tu API Key de Meteosource
+        const apiKey = 'ojhyeseo1dght586idv54lrhv4fzxr5pflw92v9b';  // Reemplaza con tu API Key de Meteosource
         const latitud = 4.60971;  // Latitud de Bogotá
         const longitud = -74.08175;  // Longitud de Bogotá
         const url = `https://www.meteosource.com/api/v1/free/point?lat=${latitud}&lon=${longitud}&sections=current&units=metric&key=${apiKey}`;
 
-        // Verificar si han pasado más de 20 minutos desde la última actualización
         function verificarTiempoUltimaActualizacion(ultimaActualizacion) {
             const ahora = new Date().getTime();
-            return (ahora - ultimaActualizacion) >= (20 * 60 * 1000); // 20 minutos
+            return (ahora - ultimaActualizacion) >= (15 * 60 * 1000); // 15 minutos
         }
 
-        // Cargar clima desde el almacenamiento local o hacer una solicitud a la API
         function cargarClimaDesdeLocalStorage() {
             const datosGuardados = JSON.parse(localStorage.getItem('clima'));
 
             if (datosGuardados && datosGuardados.ultimaActualizacion) {
                 if (verificarTiempoUltimaActualizacion(datosGuardados.ultimaActualizacion)) {
-                    obtenerClimaYGuardar(); // Actualiza si han pasado más de 20 minutos
+                    obtenerClimaYGuardar(); // Actualiza si han pasado más de 15 minutos
                 } else {
                     actualizarInterfaz(datosGuardados); // Usa datos locales si son recientes
                 }
@@ -39,24 +79,18 @@
             }
         }
 
-        // Función para obtener el clima desde la API y guardar los datos
         async function obtenerClimaYGuardar() {
             try {
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // Imprimir la respuesta completa para depurar
-                console.log("Respuesta de la API:", data);
-                
                 const clima = data.current;
                 const ahora = new Date().getTime();  // Tiempo actual
 
-                // Guardar los datos en localStorage
                 localStorage.setItem('clima', JSON.stringify({
                     temperatura: clima.temperature,
-                    humedad: clima.humidity,
-                    windSpeed: clima.wind_speed,
                     descripcion: clima.summary,
+                    nubosidad: clima.cloud_cover,  // Porcentaje de nubosidad
                     ultimaActualizacion: ahora
                 }));
 
@@ -67,15 +101,12 @@
             }
         }
 
-        // Función para actualizar la interfaz con los datos del clima
         function actualizarInterfaz(clima) {
-            document.getElementById('temp').innerText = clima.temperature ? `${clima.temperature} °C` : 'Dato no disponible';
-            document.getElementById('humidity').innerText = clima.humidity ? `${clima.humidity}%` : 'Dato no disponible';
-            document.getElementById('windSpeed').innerText = clima.wind_speed ? `${clima.wind_speed} km/h` : 'Dato no disponible';
-            document.getElementById('description').innerText = clima.summary ? clima.summary : 'Descripción no disponible';
+            document.getElementById('temp').innerText = `${clima.temperature} °C`;
+            document.getElementById('description').innerText = clima.summary;
+            document.getElementById('cloudCover').innerText = `${clima.cloud_cover}%`;  // Mostrar nubosidad
         }
 
-        // Cargar clima desde el almacenamiento local o API al cargar la página
         cargarClimaDesdeLocalStorage();
     </script>
 </body>
