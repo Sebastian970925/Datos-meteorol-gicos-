@@ -4,63 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clima Actual - Tomorrow.io</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .weather-container {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+        h1 {
+            font-size: 24px;
+            color: #007BFF;
+        }
+        p {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .data {
+            font-weight: bold;
+        }
+        footer {
+            font-size: 12px;
+            margin-top: 10px;
+            color: #666;
+        }
+    </style>
 </head>
 <body>
-    <h1>Datos Meteorológicos Actuales</h1>
-    <p><strong>Temperatura:</strong> <span id="temp">Cargando...</span></p>
-    <p><strong>Descripción del Clima:</strong> <span id="description">Cargando...</span></p>
-    <p><strong>Porcentaje de Nubosidad:</strong> <span id="cloudCover">Cargando...</span></p>
+    <div class="weather-container">
+        <h1>Datos Meteorológicos Actuales</h1>
+        <p>Temperatura: <span id="temp" class="data">Cargando...</span> °C</p>
+        <p>Humedad: <span id="humidity" class="data">Cargando...</span>%</p>
+        <p>Velocidad del Viento: <span id="windSpeed" class="data">Cargando...</span> km/h</p>
+        <p>Presión Atmosférica: <span id="pressure" class="data">Cargando...</span> hPa</p>
+        <p>Nubosidad: <span id="cloudCover" class="data">Cargando...</span>%</p>
+        <footer>Datos proporcionados por Tomorrow.io</footer>
+    </div>
 
     <script>
         const apiKey = '68OZC7L4oCjPx7R7r7oNhLb7tK8i3Z2f';  // Reemplaza con tu API Key de Tomorrow.io
         const latitud = 4.60971;  // Latitud de Bogotá
         const longitud = -74.08175;  // Longitud de Bogotá
-        const url = `https://api.tomorrow.io/v4/timelines?location=${latitud},${longitud}&fields=temperature,cloudCover,weatherCode&timesteps=current&units=metric&apikey=${apiKey}`;
+        const url = `https://api.tomorrow.io/v4/timelines?location=${latitud},${longitud}&fields=temperature,humidity,windSpeed,pressureSeaLevel,cloudCover&timesteps=current&units=metric&apikey=${apiKey}`;
 
-        // Función para obtener el clima directamente desde la API
         async function obtenerClima() {
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 const clima = data.data.timelines[0].intervals[0].values;
 
-                // Actualizar la interfaz con los datos recibidos de la API
-                document.getElementById('temp').innerText = `${clima.temperature} °C`;
-                document.getElementById('description').innerText = obtenerDescripcionClima(clima.weatherCode);
-                document.getElementById('cloudCover').innerText = `${clima.cloudCover}%`;
+                // Actualizar la interfaz con los datos obtenidos
+                document.getElementById('temp').innerText = clima.temperature;
+                document.getElementById('humidity').innerText = clima.humidity;
+                document.getElementById('windSpeed').innerText = clima.windSpeed;
+                document.getElementById('pressure').innerText = clima.pressureSeaLevel;
+                document.getElementById('cloudCover').innerText = clima.cloudCover;
 
             } catch (error) {
                 console.error('Error al obtener los datos del clima:', error);
             }
         }
 
-        // Función para obtener la descripción del clima basado en weatherCode
-        function obtenerDescripcionClima(weatherCode) {
-            const descripciones = {
-                1000: 'Despejado',
-                1100: 'Mayormente despejado',
-                1101: 'Parcialmente nublado',
-                1102: 'Mayormente nublado',
-                2000: 'Niebla',
-                2100: 'Niebla ligera',
-                3000: 'Viento',
-                3001: 'Viento ligero',
-                3002: 'Viento fuerte',
-                4000: 'Lluvia ligera',
-                4200: 'Lluvia',
-                5001: 'Nieve ligera',
-                5100: 'Nieve',
-                6000: 'Llovizna helada',
-                6200: 'Lluvia helada',
-                7000: 'Tormenta',
-                // Agrega más códigos según lo necesites
-            };
-
-            return descripciones[weatherCode] || 'Clima desconocido';
-        }
-
-        // Llamar a la función para obtener el clima al cargar la página
-        obtenerClima();
+        obtenerClima();  // Llamar a la función para obtener el clima al cargar la página
     </script>
 </body>
 </html>
