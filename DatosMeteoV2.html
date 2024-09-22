@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos Meteorológicos con Weatherstack</title>
+</head>
+<body>
+    <h1>Datos Meteorológicos Actuales</h1>
+    <p><strong>Temperatura:</strong> <span id="temp">Cargando temperatura...</span></p>
+    <p><strong>Humedad:</strong> <span id="humidity">Cargando humedad...</span></p>
+    <p><strong>Velocidad del Viento:</strong> <span id="windSpeed">Cargando...</span></p>
+    <p><strong>Descripción del Clima:</strong> <span id="description">Cargando descripción...</span></p>
+
+    <script>
+        const apiKey = '19fd3439773678c11be1874afe6cfb8b';  // Reemplaza con tu API Key de Weatherstack
+        const latitud = 4.60971;  // Latitud de Bogotá
+        const longitud = -74.08175;  // Longitud de Bogotá
+        const url = `http://api.weatherstack.com/current?access_key=${apiKey}&query=${latitud},${longitud}&units=m`;
+
+        async function obtenerClimaYGuardar() {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Imprimir en consola la respuesta completa para debugging
+                console.log("Respuesta completa de la API:", data);
+
+                if (data.error) {
+                    throw new Error(data.error.info);
+                }
+
+                const clima = {
+                    temperatura: data.current.temperature,
+                    humedad: data.current.humidity,
+                    windSpeed: data.current.wind_speed,
+                    descripcion: data.current.weather_descriptions[0]
+                };
+
+                actualizarInterfaz(clima);
+            } catch (error) {
+                console.error('Error al obtener los datos del clima:', error);
+            }
+        }
+
+        function actualizarInterfaz(clima) {
+            document.getElementById('temp').innerText = `${clima.temperatura} °C`;
+            document.getElementById('humidity').innerText = `${clima.humedad}%`;
+            document.getElementById('windSpeed').innerText = `${clima.windSpeed} km/h`;
+            document.getElementById('description').innerText = clima.descripcion;
+        }
+
+        // Cargar el clima al abrir la página
+        obtenerClimaYGuardar();
+    </script>
+</body>
+</html>
