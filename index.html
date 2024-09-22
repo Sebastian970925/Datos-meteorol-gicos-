@@ -39,43 +39,14 @@
             }
         }
 
-
-async function obtenerClimaYGuardar() {
-    try {
-        const response = await fetch(url);
-        const data = await response.json();
-        
-        // Imprimir en consola la respuesta completa
-        console.log("Respuesta completa de la API:", data);
-
-        const clima = data.current;
-        const ahora = new Date().getTime();  // Tiempo actual
-
-        // Guardar los datos en localStorage
-        localStorage.setItem('clima', JSON.stringify({
-            temperatura: clima.temperature,
-            humedad: clima.humidity,
-            windSpeed: clima.wind_speed,
-            descripcion: clima.summary,
-            ultimaActualizacion: ahora
-        }));
-
-        actualizarInterfaz(clima); // Actualizar la interfaz con los nuevos datos
-        
-    } catch (error) {
-        console.error('Error al obtener los datos del clima:', error);
-    }
-}
-
-
-
-
-        
         // Función para obtener el clima desde la API y guardar los datos
         async function obtenerClimaYGuardar() {
             try {
                 const response = await fetch(url);
                 const data = await response.json();
+
+                // Imprimir la respuesta completa para depurar
+                console.log("Respuesta de la API:", data);
                 
                 const clima = data.current;
                 const ahora = new Date().getTime();  // Tiempo actual
@@ -98,10 +69,10 @@ async function obtenerClimaYGuardar() {
 
         // Función para actualizar la interfaz con los datos del clima
         function actualizarInterfaz(clima) {
-            document.getElementById('temp').innerText = `${clima.temperature} °C`;
-            document.getElementById('humidity').innerText = `${clima.humidity}%`;
-            document.getElementById('windSpeed').innerText = `${clima.wind_speed} km/h`;
-            document.getElementById('description').innerText = clima.summary;
+            document.getElementById('temp').innerText = clima.temperature ? `${clima.temperature} °C` : 'Dato no disponible';
+            document.getElementById('humidity').innerText = clima.humidity ? `${clima.humidity}%` : 'Dato no disponible';
+            document.getElementById('windSpeed').innerText = clima.wind_speed ? `${clima.wind_speed} km/h` : 'Dato no disponible';
+            document.getElementById('description').innerText = clima.summary ? clima.summary : 'Descripción no disponible';
         }
 
         // Cargar clima desde el almacenamiento local o API al cargar la página
