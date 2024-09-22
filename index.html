@@ -16,28 +16,64 @@
         const apiKey = 'edyfobtg0k2u68czfakm5hq1yes4mj5dlcntz4e7';  // Reemplaza con tu API Key de Meteosource
         const latitud = 4.60971;  // Latitud de Bogotá
         const longitud = -74.08175;  // Longitud de Bogotá
-
         const url = `https://www.meteosource.com/api/v1/free/point?lat=${latitud}&lon=${longitud}&sections=current&units=metric&key=${apiKey}`;
 
-        async function obtenerClima() {
+        // Verificar si han pasado más de 20 minutos desde la última actualización
+        function verificarTiempoUltimaActualizacion(ultimaActualizacion) {
+            const ahora = new Date().getTime();
+            return (ahora - ultimaActualizacion) >= (20 * 60 * 1000); // 20 minutos
+        }
+
+        // Cargar clima desde el almacenamiento local o hacer una solicitud a la API
+        function cargarClimaDesdeLocalStorage() {
+            const datosGuardados = JSON.parse(localStorage.getItem('clima'));
+
+            if (datosGuardados && datosGuardados.ultimaActualizacion) {
+                if (verificarTiempoUltimaActualizacion(datosGuardados.ultimaActualizacion)) {
+                    obtenerClimaYGuardar(); // Actualiza si han pasado más de 20 minutos
+                } else {
+                    actualizarInterfaz(datosGuardados); // Usa datos locales si son recientes
+                }
+            } else {
+                obtenerClimaYGuardar(); // No hay datos locales, solicita a la API
+            }
+        }
+
+        // Función para obtener el clima desde la API y guardar los datos
+        async function obtenerClimaYGuardar() {
             try {
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                // Acceder a los datos de clima actual
                 const clima = data.current;
-                document.getElementById('temp').innerText = `${clima.temperature} °C`;
-                document.getElementById('humidity').innerText = `${clima.humidity}%`;
-                document.getElementById('windSpeed').innerText = `${clima.wind_speed} km/h`;
-                document.getElementById('description').innerText = clima.summary;
+                const ahora = new Date().getTime();  // Tiempo actual
+
+                // Guardar los datos en localStorage
+                localStorage.setItem('clima', JSON.stringify({
+                    temperatura: clima.temperature,
+                    humedad: clima.humidity,
+                    windSpeed: clima.wind_speed,
+                    descripcion: clima.summary,
+                    ultimaActualizacion: ahora
+                }));
+
+                actualizarInterfaz(clima); // Actualizar la interfaz con los nuevos datos
                 
             } catch (error) {
                 console.error('Error al obtener los datos del clima:', error);
             }
         }
 
-        // Llamar a la función para cargar el clima al cargar la página
-        obtenerClima();
+        // Función para actualizar la interfaz con los datos del clima
+        function actualizarInterfaz(clima) {
+            document.getElementById('temp').innerText = `${clima.temperature} °C`;
+            document.getElementById('humidity').innerText = `${clima.humidity}%`;
+            document.getElementById('windSpeed').innerText = `${clima.wind_speed} km/h`;
+            document.getElementById('description').innerText = clima.summary;
+        }
+
+        // Cargar clima desde el almacenamiento local o API al cargar la página
+        cargarClimaDesdeLocalStorage();
     </script>
 </body>
 </html>
